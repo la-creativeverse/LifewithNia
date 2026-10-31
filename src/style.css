@@ -590,16 +590,18 @@ html, body {
   color: #e53935;
 }
 
-/* Offscreen YouTube Player Wrap */
+/* In-viewport but invisible YouTube Player Wrap so browser allows audio decoding */
 .yt-bg-player-wrap {
   position: fixed;
-  bottom: -9999px;
-  left: -9999px;
+  top: 0;
+  left: 0;
   width: 200px;
   height: 200px;
-  opacity: 0.01;
+  opacity: 0.001;
   pointer-events: none;
   z-index: -10;
+  overflow: hidden;
+  clip-path: inset(100%);
 }
 
 /* Floating Ambient Music Bar (Inline with bottom day navigation line) */

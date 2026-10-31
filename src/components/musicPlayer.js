@@ -12,6 +12,7 @@ export class BackgroundMusicPlayer {
     this.isPlaying = false;
     this.isUserPaused = false; // Only pause if user explicitly paused once
     this.currentTrackIndex = -1;
+    this.pendingTrackIndex = null;
     this.ytPlayer = null;
     this.htmlAudio = null;
     this.isYtReady = false;
@@ -48,7 +49,7 @@ export class BackgroundMusicPlayer {
   }
 
   loadYouTubeIframeAPI() {
-    // Offscreen container for YouTube Player
+    // In-viewport invisible container for YouTube Player
     const ytContainer = document.createElement('div');
     ytContainer.id = 'yt-bg-player-wrap';
     ytContainer.className = 'yt-bg-player-wrap';
@@ -73,51 +74,84 @@ export class BackgroundMusicPlayer {
   }
 
   onYouTubeReady() {
-    this.ytPlayer = new window.YT.Player('yt-bg-player-iframe', {
-      height: '180',
-      width: '280',
-      playerVars: {
-        autoplay: 1,
-        controls: 1,
-        disablekb: 1,
-        enablejsapi: 1,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0
-      },
-      events: {
-        onReady: () => {
-          this.isYtReady = true;
-          this.updateUI();
-          // Auto play first day's song
-          this.playTrack(this.getActiveIndex());
+    try {
+      this.ytPlayer = new window.YT.Player('yt-bg-player-iframe', {
+        height: '200',
+        width: '200',
+        playerVars: {
+          autoplay: 1,
+          controls: 0,
+          disablekb: 1,
+          enablejsapi: 1,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
+          origin: window.location.origin
         },
-        onStateChange: (event) => {
-          // YT.PlayerState.PLAYING = 1, PAUSED = 2, ENDED = 0
-          if (event.data === window.YT.PlayerState.PLAYING) {
-            this.isPlaying = true;
+        events: {
+          onReady: (event) => {
+            this.isYtReady = true;
+            try {
+              const iframe = event.target.getIframe();
+              if (iframe) {
+                iframe.setAttribute('allow', 'autoplay; encrypted-media; picture-in-picture');
+              }
+              if (typeof this.ytPlayer.unMute === 'function') {
+                this.ytPlayer.unMute();
+              }
+              if (typeof this.ytPlayer.setVolume === 'function') {
+                this.ytPlayer.setVolume(100);
+              }
+            } catch (_) {}
+
             this.updateUI();
-          } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
-            this.isPlaying = false;
-            this.updateUI();
+
+            // Play active day's track
+            const trackToPlay = this.pendingTrackIndex !== null ? this.pendingTrackIndex : this.getActiveIndex();
+            this.pendingTrackIndex = null;
+            if (!this.isUserPaused) {
+              this.playTrack(trackToPlay);
+            }
+          },
+          onStateChange: (event) => {
+            // YT.PlayerState: PLAYING = 1, PAUSED = 2, ENDED = 0
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              this.isPlaying = true;
+              this.updateUI();
+            } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+              this.isPlaying = false;
+              this.updateUI();
+            }
+          },
+          onError: (err) => {
+            console.warn('YouTube Player error code:', err.data);
           }
         }
-      }
-    });
+      });
+    } catch (e) {
+      console.warn('Error initializing YouTube Player', e);
+    }
   }
 
   setupAutoPlayOnOpen() {
     const triggerStart = () => {
-      if (!this.isPlaying) {
+      if (!this.isPlaying && !this.isUserPaused) {
+        if (this.ytPlayer && this.isYtReady) {
+          try {
+            if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();
+            if (typeof this.ytPlayer.setVolume === 'function') this.ytPlayer.setVolume(100);
+          } catch (_) {}
+        }
         this.playTrack(this.getActiveIndex());
       }
     };
 
     // If browser autoplay policy holds sound until first gesture,
-    // immediately unlock and play on first click, scroll, touch, or keydown
+    // immediately unlock sound and play on first click, touch, or scroll
     const unlockGesture = () => {
       triggerStart();
       window.removeEventListener('pointerdown', unlockGesture);
+      window.removeEventListener('click', unlockGesture);
       window.removeEventListener('scroll', unlockGesture);
       window.removeEventListener('wheel', unlockGesture);
       window.removeEventListener('keydown', unlockGesture);
@@ -125,6 +159,7 @@ export class BackgroundMusicPlayer {
     };
 
     window.addEventListener('pointerdown', unlockGesture, { once: true, passive: true });
+    window.addEventListener('click', unlockGesture, { once: true, passive: true });
     window.addEventListener('scroll', unlockGesture, { once: true, passive: true });
     window.addEventListener('wheel', unlockGesture, { once: true, passive: true });
     window.addEventListener('keydown', unlockGesture, { once: true, passive: true });
@@ -209,6 +244,12 @@ export class BackgroundMusicPlayer {
       this.pause(true); // User explicitly paused!
     } else {
       this.isUserPaused = false; // User explicitly resumed playback!
+      if (this.ytPlayer && this.isYtReady) {
+        try {
+          if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();
+          if (typeof this.ytPlayer.setVolume === 'function') this.ytPlayer.setVolume(100);
+        } catch (_) {}
+      }
       this.playTrack(index);
     }
   }
@@ -234,13 +275,24 @@ export class BackgroundMusicPlayer {
         this.isPlaying = true;
         this.updateUI();
       }).catch(e => console.warn('Audio play prevented', e));
-    } else if (ytId && this.ytPlayer && this.isYtReady) {
+    } else if (ytId) {
       // Pause HTML Audio
       this.htmlAudio.pause();
-      this.ytPlayer.loadVideoById(ytId);
-      this.ytPlayer.playVideo();
-      this.isPlaying = true;
-      this.updateUI();
+      if (this.ytPlayer && this.isYtReady) {
+        try {
+          if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();
+          if (typeof this.ytPlayer.setVolume === 'function') this.ytPlayer.setVolume(100);
+          this.ytPlayer.loadVideoById(ytId);
+          this.ytPlayer.playVideo();
+          this.isPlaying = true;
+          this.updateUI();
+        } catch (err) {
+          console.warn('Failed to play YouTube track', err);
+        }
+      } else {
+        // Player not ready yet, queue for when onReady fires
+        this.pendingTrackIndex = index;
+      }
     } else if (songUrl) {
       this.updateUI();
     }
