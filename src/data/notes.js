@@ -17,7 +17,7 @@ export const initialNotes = [
     videoUrl: "https://youtu.be/2n57drFy8C0?si=OyW70V_FbPmr0ara",
     videoTitle: "How Can You Be Sure of God’s Will?",
 
-    caption: "Morning silence & open hands",
+    caption: "Holiness is Relational. Let's Pray for Dada - Conny",
     tapeColor: "washi-gold", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
     tapeAngle: -2.5
   }
