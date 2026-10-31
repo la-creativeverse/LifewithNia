@@ -5,18 +5,23 @@ import { ScrapbookDOM } from './components/scrapbookDom.js';
 import { TimelineNav } from './components/timelineNav.js';
 import { audioManager } from './components/audioManager.js';
 import { BackgroundMusicPlayer } from './components/musicPlayer.js';
+import { SplashScreen } from './components/splashScreen.js';
 
 class App {
   constructor() {
     this.notes = initialNotes;
 
-    // Automatically detect today's date and naturally open to today's note
-    const todayIndex = this.findTodayIndex();
-    this.currentIndex = todayIndex;
-    this.scrollProgress = todayIndex;
-    this.targetScrollProgress = todayIndex;
-    this.lastActiveIndex = todayIndex;
+    // Detect today's target note index (or latest available entry)
+    this.todayIndex = this.findTodayIndex();
 
+    // The site always opens initially at Day 1 (index 0)
+    this.currentIndex = 0;
+    this.scrollProgress = 0;
+    this.targetScrollProgress = 0;
+    this.lastActiveIndex = 0;
+
+    this.isAutoScrolling = false;
+    this.autoScrollRaf = null;
     this.isScrolling = false;
     this.lastScrollTime = 0;
 
@@ -25,14 +30,29 @@ class App {
   }
 
   findTodayIndex() {
+    if (!this.notes || this.notes.length === 0) return 0;
+
     const now = new Date();
     const localYear = now.getFullYear();
     const localMonth = String(now.getMonth() + 1).padStart(2, '0');
     const localDay = String(now.getDate()).padStart(2, '0');
     const todayDateStr = `${localYear}-${localMonth}-${localDay}`;
 
-    const idx = this.notes.findIndex((n) => n.date === todayDateStr);
-    return idx !== -1 ? idx : 0;
+    // 1. Exact date match for today
+    const exactIdx = this.notes.findIndex((n) => n.date === todayDateStr);
+    if (exactIdx !== -1) return exactIdx;
+
+    // 2. Nearest note on or before today
+    let latestPastIdx = -1;
+    for (let i = 0; i < this.notes.length; i++) {
+      if (this.notes[i].date && this.notes[i].date <= todayDateStr) {
+        latestPastIdx = i;
+      }
+    }
+    if (latestPastIdx !== -1) return latestPastIdx;
+
+    // 3. Fallback to latest note
+    return Math.max(0, this.notes.length - 1);
   }
 
   init() {
@@ -64,8 +84,8 @@ class App {
     const origamiStage = document.getElementById('origami-stage');
     this.origamiCanvas = new OrigamiCanvas(origamiStage);
 
-    // 3. Initialize Background Music Player
-    this.musicPlayer = new BackgroundMusicPlayer(this.notes, () => this.currentIndex);
+    // 3. Initialize Background Music Player (waits for splash screen surrender)
+    this.musicPlayer = new BackgroundMusicPlayer(this.notes, () => this.currentIndex, false);
 
     // 4. Initialize Scrapbook DOM Cards
     const scrapbookTrack = document.getElementById('scrapbook-track');
@@ -81,8 +101,100 @@ class App {
     // 6. Setup Scroll Engine & Virtual Physics
     this.setupScrollInteractions();
 
-    // Initial render call
+    // 7. Initial render call (renders Day 1 initially)
     this.updatePositions();
+
+    // 8. Launch Splash Screen: "My" -> "Thy Will Be Done" Surrender Interaction
+    this.splashScreen = new SplashScreen(() => {
+      // Called when user pulls off "My" and bright white light fills the screen
+      if (this.musicPlayer) {
+        this.musicPlayer.startPlayback();
+      }
+
+      // Quick auto scroll from Day 1 to current day note as the white veil opens
+      setTimeout(() => {
+        this.performAutoScrollToToday();
+      }, 350);
+    });
+  }
+
+  performAutoScrollToToday() {
+    const targetIndex = this.findTodayIndex();
+    this.todayIndex = targetIndex;
+
+    // If targetIndex is Day 1 (0) or invalid, already in place
+    if (targetIndex <= 0 || targetIndex >= this.notes.length) {
+      return;
+    }
+
+    this.cancelAutoScroll();
+
+    // Respect user's motion preferences
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.scrollProgress = targetIndex;
+      this.targetScrollProgress = targetIndex;
+      this.updatePositions();
+      return;
+    }
+
+    this.isAutoScrolling = true;
+    const startProgress = 0;
+    const distance = targetIndex - startProgress;
+
+    // Snappy, quick duration: ~350ms base + 220ms per day (capped between 650ms and 1500ms)
+    const duration = Math.min(1500, Math.max(650, 350 + distance * 220));
+    const startTime = performance.now();
+
+    let lastRustleIndex = -1;
+
+    // Smooth cubic easing (gentle start, quick sweep through notes, elegant ease-out into current day)
+    const ease = (t) => {
+      return t < 0.5 
+        ? 4 * t * t * t 
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const step = (now) => {
+      if (!this.isAutoScrolling) return;
+
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const current = startProgress + distance * ease(t);
+
+      this.scrollProgress = current;
+      this.targetScrollProgress = current;
+      this.updatePositions();
+
+      // Tactile paper rustle as notes flip by
+      const currentFloor = Math.floor(current);
+      if (currentFloor !== lastRustleIndex && currentFloor < targetIndex) {
+        lastRustleIndex = currentFloor;
+        audioManager.playRustle(1.2);
+      }
+
+      if (t < 1) {
+        this.autoScrollRaf = requestAnimationFrame(step);
+      } else {
+        this.isAutoScrolling = false;
+        this.scrollProgress = targetIndex;
+        this.targetScrollProgress = targetIndex;
+        this.updatePositions();
+        audioManager.playCrease(0.8);
+      }
+    };
+
+    this.autoScrollRaf = requestAnimationFrame(step);
+  }
+
+  cancelAutoScroll() {
+    if (this.isAutoScrolling) {
+      this.isAutoScrolling = false;
+      if (this.autoScrollRaf) {
+        cancelAnimationFrame(this.autoScrollRaf);
+        this.autoScrollRaf = null;
+      }
+      this.targetScrollProgress = this.scrollProgress;
+    }
   }
 
   setupScrollInteractions() {
@@ -92,6 +204,7 @@ class App {
     // Wheel listener (smooth normalized scroll)
     window.addEventListener('wheel', (e) => {
       e.preventDefault();
+      this.cancelAutoScroll();
       audioManager.ensureContext();
 
       // Normalize delta
@@ -109,11 +222,13 @@ class App {
 
     // Touch support for mobile / tablets
     window.addEventListener('touchstart', (e) => {
+      this.cancelAutoScroll();
       touchStartY = e.touches[0].clientY;
       audioManager.ensureContext();
     }, { passive: true });
 
     window.addEventListener('touchmove', (e) => {
+      this.cancelAutoScroll();
       touchMoveY = e.touches[0].clientY;
       const deltaY = touchStartY - touchMoveY;
       touchStartY = touchMoveY;
@@ -125,11 +240,13 @@ class App {
 
     // Animation Loop for butter-smooth 60-120fps lerp
     const lerpLoop = () => {
-      const diff = this.targetScrollProgress - this.scrollProgress;
+      if (!this.isAutoScrolling) {
+        const diff = this.targetScrollProgress - this.scrollProgress;
 
-      if (Math.abs(diff) > 0.0005) {
-        this.scrollProgress += diff * 0.12;
-        this.updatePositions();
+        if (Math.abs(diff) > 0.0005) {
+          this.scrollProgress += diff * 0.12;
+          this.updatePositions();
+        }
       }
 
       requestAnimationFrame(lerpLoop);
@@ -138,6 +255,7 @@ class App {
   }
 
   scrollToIndex(index) {
+    this.cancelAutoScroll();
     audioManager.ensureContext();
     audioManager.playCrease(0.8);
     this.targetScrollProgress = Math.max(0, Math.min(this.notes.length - 1, index));

@@ -6,11 +6,12 @@ export function extractYouTubeId(url) {
 }
 
 export class BackgroundMusicPlayer {
-  constructor(notes, getActiveIndex) {
+  constructor(notes, getActiveIndex, autoStart = false) {
     this.notes = notes;
     this.getActiveIndex = getActiveIndex;
     this.isPlaying = false;
     this.isUserPaused = false; // Only pause if user explicitly paused once
+    this.canAutoPlay = autoStart;
     this.currentTrackIndex = -1;
     this.pendingTrackIndex = null;
     this.ytPlayer = null;
@@ -106,10 +107,10 @@ export class BackgroundMusicPlayer {
 
             this.updateUI();
 
-            // Play active day's track
+            // Play active day's track if autoplay permitted
             const trackToPlay = this.pendingTrackIndex !== null ? this.pendingTrackIndex : this.getActiveIndex();
             this.pendingTrackIndex = null;
-            if (!this.isUserPaused) {
+            if (!this.isUserPaused && this.canAutoPlay) {
               this.playTrack(trackToPlay);
             }
           },
@@ -133,9 +134,21 @@ export class BackgroundMusicPlayer {
     }
   }
 
+  startPlayback() {
+    this.canAutoPlay = true;
+    this.isUserPaused = false;
+    if (this.ytPlayer && this.isYtReady) {
+      try {
+        if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();
+        if (typeof this.ytPlayer.setVolume === 'function') this.ytPlayer.setVolume(100);
+      } catch (_) {}
+    }
+    this.playTrack(this.getActiveIndex());
+  }
+
   setupAutoPlayOnOpen() {
     const triggerStart = () => {
-      if (!this.isPlaying && !this.isUserPaused) {
+      if (!this.isPlaying && !this.isUserPaused && this.canAutoPlay) {
         if (this.ytPlayer && this.isYtReady) {
           try {
             if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();

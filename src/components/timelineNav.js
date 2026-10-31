@@ -178,7 +178,7 @@ export class TimelineNav {
     closeBtn.addEventListener('click', closeDrawer);
     backdrop.addEventListener('click', closeDrawer);
 
-    // Jump today (finds matching date or falls back to Day 1)
+    // Jump today (finds matching date or closest recent day)
     jumpTodayBtn.addEventListener('click', () => {
       const now = new Date();
       const localYear = now.getFullYear();
@@ -187,7 +187,16 @@ export class TimelineNav {
       const todayDateStr = `${localYear}-${localMonth}-${localDay}`;
 
       const todayIdx = this.notes.findIndex((n) => n.date === todayDateStr);
-      const targetIdx = todayIdx !== -1 ? todayIdx : 0;
+      let targetIdx = todayIdx !== -1 ? todayIdx : -1;
+
+      if (targetIdx === -1) {
+        for (let i = 0; i < this.notes.length; i++) {
+          if (this.notes[i].date && this.notes[i].date <= todayDateStr) {
+            targetIdx = i;
+          }
+        }
+      }
+      if (targetIdx === -1) targetIdx = Math.max(0, this.notes.length - 1);
 
       this.onSelectDate(targetIdx);
       audioManager.playChime(640);

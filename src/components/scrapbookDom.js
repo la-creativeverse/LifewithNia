@@ -65,6 +65,13 @@ export class ScrapbookDOM {
                 </p>
               </div>
 
+              <!-- Note Signature Area (Editable through notes.js) -->
+              ${item.signature ? `
+                <div class="note-signature">
+                  <span class="signature-text">${item.signature}</span>
+                </div>
+              ` : ''}
+
               <!-- Sacred Scripture Whisper (Mild Christian Element) -->
               <div class="scripture-whisper">
                 <div class="sacred-cross-divider" aria-hidden="true">

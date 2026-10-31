@@ -414,6 +414,27 @@ html, body {
   color: var(--sacred-gold);
 }
 
+/* Note Sign-Off / Signature Area (Editable in notes.js) */
+.note-signature {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: -1.2rem;
+  margin-bottom: 1.8rem;
+  padding-right: 0.6rem;
+}
+
+.signature-text {
+  font-family: var(--font-handwritten);
+  font-size: 1.55rem;
+  font-weight: 600;
+  color: #3b2e24;
+  letter-spacing: 0.02em;
+  transform: rotate(-1.5deg);
+  display: inline-block;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
 /* Sacred Scripture Whisper */
 .scripture-whisper {
   margin-top: 1.8rem;
@@ -1274,6 +1295,16 @@ html, body {
     padding-bottom: 0;
   }
 
+  .note-signature {
+    margin-top: -0.65rem;
+    margin-bottom: 0.85rem;
+    padding-right: 0.3rem;
+  }
+
+  .signature-text {
+    font-size: 1.25rem;
+  }
+
   .scripture-whisper {
     margin-top: 0.9rem;
     padding-top: 0.75rem;
@@ -1387,6 +1418,529 @@ html, body {
   }
 }
 
+/* ==========================================================================
+   SPLASH SCREEN: SURRENDER INTERACTION ("My" -> "Thy Will Be Done")
+   ========================================================================== */
+.splash-screen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background-color: var(--card-paper);
+  background-image: 
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.95) 0%, rgba(247, 243, 233, 0.85) 60%, rgba(235, 226, 210, 0.95) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.85s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.85s;
+  perspective: 1000px;
+}
+
+.splash-ambient-light {
+  position: absolute;
+  top: -20%;
+  left: 20%;
+  width: 160%;
+  height: 140%;
+  background: radial-gradient(ellipse at 50% 30%, rgba(255, 240, 200, 0.45) 0%, rgba(255, 248, 230, 0.2) 40%, transparent 70%);
+  pointer-events: none;
+  animation: divineLightDrift 14s ease-in-out infinite alternate;
+}
+
+.splash-paper-grain {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(44, 34, 25, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.splash-stage {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  max-width: 650px;
+  padding: 2rem;
+  user-select: none;
+}
+
+.splash-cross {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  color: var(--sacred-gold);
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 16px rgba(197, 160, 89, 0.45);
+  animation: crossFloat 4s ease-in-out infinite;
+}
+
+@keyframes crossFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.splash-title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.splash-word-row {
+  position: relative;
+  width: 240px;
+  height: 115px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 900px;
+}
+
+/* The underlying revealed divine "Thy" */
+.sacred-thy-word {
+  font-family: var(--font-display);
+  font-size: 5.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--sacred-gold);
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 0 20px rgba(197, 160, 89, 0.5);
+  opacity: 0.25;
+  transition: opacity 0.5s ease, text-shadow 0.5s ease;
+}
+
+.sacred-thy-word.revealed {
+  opacity: 1;
+  animation: goldenIlluminate 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes goldenIlluminate {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.3;
+    text-shadow: 0 0 10px rgba(197, 160, 89, 0.3);
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+    color: #e5b95f;
+    text-shadow: 0 0 45px rgba(255, 230, 150, 0.95), 0 0 75px rgba(255, 255, 255, 0.9);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+    color: var(--sacred-gold);
+    text-shadow: 0 0 28px rgba(197, 160, 89, 0.7);
+  }
+}
+
+/* The hand-torn sticky paper note with "My" */
+.peelable-my-note {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 175px;
+  height: 98px;
+  background-color: #fdfbf7;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 241, 230, 0.6) 100%);
+  border: 1px solid rgba(215, 200, 180, 0.65);
+  border-radius: 2px;
+  box-shadow: 
+    0 4px 14px rgba(44, 34, 25, 0.12),
+    0 1px 3px rgba(44, 34, 25, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  z-index: 5;
+  transition: box-shadow 0.25s ease;
+}
+
+.peelable-my-note:hover {
+  box-shadow: 
+    0 8px 24px rgba(44, 34, 25, 0.16),
+    0 2px 6px rgba(44, 34, 25, 0.08);
+}
+
+.peelable-my-note.is-peeling {
+  cursor: grabbing;
+  box-shadow: 
+    0 18px 45px rgba(44, 34, 25, 0.24),
+    0 4px 12px rgba(44, 34, 25, 0.12);
+}
+
+/* Washi Tape Strip fastening "My" down */
+.peel-washi-strip {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(1.5deg);
+  width: 75px;
+  height: 22px;
+  background-color: var(--washi-gold);
+  opacity: 0.82;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  clip-path: polygon(
+    3% 0%, 97% 0%, 100% 15%, 98% 50%, 100% 85%, 97% 100%, 
+    3% 100%, 0% 85%, 2% 50%, 0% 15%
+  );
+  pointer-events: none;
+}
+
+.peel-my-text {
+  font-family: var(--font-handwritten);
+  font-size: 3.8rem;
+  font-weight: 700;
+  color: #2b2118;
+  line-height: 1;
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+/* Visual curl hint on the corner */
+.peel-curl-corner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, transparent 50%, rgba(200, 180, 150, 0.45) 50%, #f4eee2 100%);
+  box-shadow: -2px -2px 6px rgba(44, 34, 25, 0.1);
+  border-radius: 0 0 2px 0;
+  pointer-events: none;
+  animation: curlPulse 3s ease-in-out infinite;
+}
+
+@keyframes curlPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Flutters away when surrendered */
+.peelable-my-note.fly-away {
+  pointer-events: none;
+  animation: flyAwayPeel 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes flyAwayPeel {
+  0% {
+    transform: translate3d(0, 0, 0) rotateZ(0deg) rotateX(0deg) scale(1);
+    opacity: 1;
+  }
+  35% {
+    transform: translate3d(100px, 60px, 120px) rotateZ(28deg) rotateX(-20deg) scale(0.95);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate3d(360px, 260px, 280px) rotateZ(75deg) rotateX(-55deg) scale(0.65);
+    opacity: 0;
+  }
+}
+
+.splash-will-be-done {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-primary);
+  margin-top: 0.35rem;
+  line-height: 1.15;
+}
+
+.splash-latin-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-top: 0.65rem;
+}
+
+/* Pull hint pill */
+.splash-pull-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(197, 160, 89, 0.3);
+  box-shadow: 0 4px 16px rgba(44, 34, 25, 0.06);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  animation: floatHint 3s infinite ease-in-out;
+}
+
+.splash-pull-hint em {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--ink-primary);
+}
+
+.hint-hand-icon {
+  font-size: 0.95rem;
+}
+
+.hint-arrow {
+  font-size: 0.9rem;
+  color: var(--sacred-gold);
+}
+
+@keyframes floatHint {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Stage shockwave rumble impulse */
+.splash-stage.shockwave-pulse {
+  animation: stageShockRumble 0.85s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes stageShockRumble {
+  0% { transform: scale(1); filter: brightness(1); }
+  15% { transform: scale(1.025) translate(-2px, -3px); filter: brightness(1.7); }
+  30% { transform: scale(0.99) translate(3px, 2px); filter: brightness(2.0); }
+  50% { transform: scale(1.015) translate(-1px, 2px); filter: brightness(2.4); }
+  75% { transform: scale(1.005) translate(1px, -1px); filter: brightness(2.8); }
+  100% { transform: scale(1) translate(0, 0); filter: brightness(3.5); }
+}
+
+/* Celestial Shockwave & Ray Blast Emitters */
+.splash-shockwave-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.splash-shockwave-ring,
+.splash-shockwave-secondary {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.08);
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.splash-shockwave-ring.blast-active {
+  animation: shockwaveExplode 1.9s cubic-bezier(0.12, 0.75, 0.22, 1) forwards;
+}
+
+.splash-shockwave-secondary.blast-active {
+  animation: shockwaveExplode 1.9s cubic-bezier(0.18, 0.75, 0.28, 1) 0.16s forwards;
+}
+
+@keyframes shockwaveExplode {
+  0% {
+    transform: translate(-50%, -50%) scale(0.08);
+    opacity: 1;
+    border: 12px solid #ffffff;
+    box-shadow: 
+      0 0 50px 25px rgba(255, 255, 255, 1),
+      0 0 100px 50px rgba(255, 235, 160, 0.95),
+      inset 0 0 40px rgba(255, 255, 255, 0.95);
+  }
+  30% {
+    opacity: 1;
+    border: 28px solid rgba(255, 255, 255, 0.98);
+    box-shadow: 
+      0 0 120px 60px rgba(255, 255, 255, 1),
+      0 0 220px 110px rgba(255, 240, 180, 0.9);
+  }
+  65% {
+    opacity: 0.85;
+    border: 45px solid rgba(255, 255, 255, 0.75);
+    box-shadow: 
+      0 0 240px 120px rgba(255, 255, 255, 0.85),
+      0 0 380px 180px rgba(255, 245, 200, 0.6);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(42);
+    opacity: 0;
+    border: 75px solid rgba(255, 255, 255, 0);
+    box-shadow: 
+      0 0 500px 250px rgba(255, 255, 255, 0);
+  }
+}
+
+.splash-celestial-rays {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  width: 120vmax;
+  height: 120vmax;
+  transform: translate(-50%, -50%) scale(0.15) rotate(0deg);
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.45) 0deg 12deg,
+    transparent 12deg 24deg,
+    rgba(255, 240, 180, 0.35) 24deg 36deg,
+    transparent 36deg 48deg
+  );
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.splash-celestial-rays.blast-active {
+  animation: celestialRaysBurst 2.3s cubic-bezier(0.12, 0.8, 0.28, 1) forwards;
+}
+
+@keyframes celestialRaysBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0.15) rotate(0deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1.1) rotate(22deg);
+  }
+  60% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scale(2.2) rotate(58deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3.5) rotate(95deg);
+  }
+}
+
+/* Full-Screen Radiant White Light Bloom Transition */
+.splash-holy-bloom {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: radial-gradient(circle at 50% 48%, #ffffff 0%, #fffef8 35%, #ffffff 80%);
+  opacity: 0;
+  transition: opacity 2.0s cubic-bezier(0.16, 0.84, 0.3, 1);
+  backdrop-filter: brightness(1) blur(0px);
+  -webkit-backdrop-filter: brightness(1) blur(0px);
+}
+
+.splash-holy-bloom.active {
+  opacity: 1;
+  backdrop-filter: brightness(3.5) blur(22px);
+  -webkit-backdrop-filter: brightness(3.5) blur(22px);
+}
+
+.bloom-inner-flare {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 1) 0%, rgba(255, 252, 235, 0.95) 30%, rgba(255, 255, 255, 0.9) 65%, #ffffff 100%);
+  opacity: 0;
+  transition: opacity 1.8s ease-in;
+}
+
+.splash-holy-bloom.active .bloom-inner-flare {
+  opacity: 1;
+}
+
+.splash-screen-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 1.3s cubic-bezier(0.2, 0.8, 0.3, 1), visibility 1.3s;
+}
+
+/* Mobile responsive rules for Splash Screen */
+@media (max-width: 768px) {
+  .splash-stage {
+    padding: 1.5rem 1rem;
+    max-width: 92vw;
+  }
+
+  .splash-cross {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .splash-word-row {
+    width: 200px;
+    height: 95px;
+  }
+
+  .sacred-thy-word {
+    font-size: 4.4rem;
+  }
+
+  .peelable-my-note {
+    width: 145px;
+    height: 82px;
+  }
+
+  .peel-washi-strip {
+    width: 62px;
+    height: 18px;
+    top: -10px;
+  }
+
+  .peel-my-text {
+    font-size: 3.1rem;
+  }
+
+  .splash-will-be-done {
+    font-size: 2.15rem;
+    letter-spacing: 0.12em;
+    margin-top: 0.25rem;
+  }
+
+  .splash-latin-sub {
+    font-size: 1rem;
+    margin-top: 0.45rem;
+  }
+
+  .splash-pull-hint {
+    font-size: 0.76rem;
+    padding: 0.35rem 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .sacred-thy-word {
+    font-size: 3.8rem;
+  }
+
+  .peelable-my-note {
+    width: 130px;
+    height: 74px;
+  }
+
+  .peel-my-text {
+    font-size: 2.7rem;
+  }
+
+  .splash-will-be-done {
+    font-size: 1.85rem;
+    letter-spacing: 0.09em;
+  }
+}
+
 /* --- Reduced Motion Mode --- */
 @media (prefers-reduced-motion: reduce) {
   .origami-sheet-card {
@@ -1403,6 +1957,17 @@ html, body {
   }
 
   .today-pulse {
+    animation: none !important;
+  }
+
+  .splash-shockwave-ring,
+  .splash-shockwave-secondary,
+  .splash-celestial-rays {
+    animation: none !important;
+    display: none !important;
+  }
+
+  .splash-stage.shockwave-pulse {
     animation: none !important;
   }
 }

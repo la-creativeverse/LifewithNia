@@ -7,6 +7,7 @@ export const initialNotes = [
     timelineDate: "October 31, 2026",
     title: "Do Not be Afraid",
     note: "It's hard but we wait on the Lord. It feels like a call to Trust. Let's learn to truly Love and To Trust even in the storms. And Jesus asks us - Don't you know that I'm in control, Trust Me.",
+    signature: "With Love - LA",
     scripture: "And he said to them, “Why are you afraid, you of little faith?” Then he got up and rebuked the winds and the sea; and there was a dead calm. — Matthew 8:26",
 
     // Background Song (plays in the bottom-right song player)

@@ -155,6 +155,77 @@ class AudioManager {
     osc.start(now);
     osc.stop(now + 1.2);
   }
+
+  // Divine celestial blast / shockwave surge on surrender
+  playSacredBlast() {
+    if (this.isMuted) return;
+    this.ensureContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+
+    try {
+      // 1. Warm celestial sub-bass resonance swell
+      const subOsc = this.ctx.createOscillator();
+      const subGain = this.ctx.createGain();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(110, now);
+      subOsc.frequency.exponentialRampToValueAtTime(220, now + 1.2);
+      subGain.gain.setValueAtTime(0.0001, now);
+      subGain.gain.linearRampToValueAtTime(0.07, now + 0.3);
+      subGain.gain.exponentialRampToValueAtTime(0.00001, now + 2.2);
+      subOsc.connect(subGain);
+      subGain.connect(this.ctx.destination);
+      subOsc.start(now);
+      subOsc.stop(now + 2.2);
+
+      // 2. Harmonic sacred chime chord (528 Hz miracle note + 792 Hz + 1056 Hz angelic harmonics)
+      const pitches = [528, 792, 1056];
+      pitches.forEach((pitch, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(pitch, now + 0.08 * idx);
+        osc.frequency.exponentialRampToValueAtTime(pitch * 0.995, now + 2.6);
+        gain.gain.setValueAtTime(0.0001, now + 0.08 * idx);
+        gain.gain.linearRampToValueAtTime(0.05 / (idx + 1), now + 0.2 + 0.08 * idx);
+        gain.gain.exponentialRampToValueAtTime(0.00001, now + 2.8);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + 0.08 * idx);
+        osc.stop(now + 2.8);
+      });
+
+      // 3. Gentle celestial rush / breath of radiant light (swept filtered noise)
+      const duration = 1.8;
+      const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * 0.5;
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(250, now);
+      filter.frequency.exponentialRampToValueAtTime(3200, now + 0.9);
+      filter.frequency.exponentialRampToValueAtTime(600, now + duration);
+
+      const noiseGain = this.ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.0001, now);
+      noiseGain.gain.linearRampToValueAtTime(0.065, now + 0.4);
+      noiseGain.gain.exponentialRampToValueAtTime(0.00001, now + duration);
+
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(this.ctx.destination);
+      noise.start(now);
+      noise.stop(now + duration);
+    } catch (err) {
+      console.warn("Sacred blast audio synthesis error:", err);
+    }
+  }
 }
 
 export const audioManager = new AudioManager();
