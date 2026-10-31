@@ -72,7 +72,7 @@ Each note has this simple, clean format:
 
 ---
 
-## 🚀 Running the Project
+## 🚀 Running & Deploying the Project
 
 ```bash
 # Start local development server
@@ -81,5 +81,10 @@ npm run dev
 # Or build for production
 npm run build
 npm run preview
+
+# Deploy latest changes to GitHub Pages
+npm run deploy
 ```
+
+Live Website: **[https://la-creativeverse.github.io/LifewithNia/](https://la-creativeverse.github.io/LifewithNia/)**
 
