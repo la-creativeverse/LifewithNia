@@ -21,28 +21,28 @@ export const initialNotes = [
     tapeColor: "washi-gold", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
     tapeAngle: -2.5
   },
-  {
-    id: "day-2",
-    dayNumber: 2,
-    date: "2026-10-31",
-    dayOfWeek: "Sunday",
-    timelineDate: "November 1, 2026",
-    title: "Coming Soon",
-    note: "...",
-    scripture: "...",
+  // {
+  //   id: "day-2",
+  //   dayNumber: 2,
+  //   date: "2026-10-31",
+  //   dayOfWeek: "Sunday",
+  //   timelineDate: "November 1, 2026",
+  //   title: "Coming Soon",
+  //   note: "...",
+  //   scripture: "...",
 
-    // Background Song (plays in the bottom-right song player)
-    songUrl: "https://www.youtube.com/watch?v=0k1WhFtVp0o",
-    songTitle: "Great Is Thy Faithfulness · Piano Reflection",
+  //   // Background Song (plays in the bottom-right song player)
+  //   songUrl: "https://www.youtube.com/watch?v=0k1WhFtVp0o",
+  //   songTitle: "Great Is Thy Faithfulness · Piano Reflection",
 
-    // Reflection Video (opened by the wax stamp on the note card)
-    videoUrl: "https://www.youtube.com/watch?v=0k1WhFtVp0o",
-    videoTitle: "Great Is Thy Faithfulness Reflection",
+  //   // Reflection Video (opened by the wax stamp on the note card)
+  //   videoUrl: "https://www.youtube.com/watch?v=0k1WhFtVp0o",
+  //   videoTitle: "Great Is Thy Faithfulness Reflection",
 
-    caption: "One fold at a time",
-    tapeColor: "washi-linen",
-    tapeAngle: 1.8
-  },
+  //   caption: "One fold at a time",
+  //   tapeColor: "washi-linen",
+  //   tapeAngle: 1.8
+  // },
   // {
   //   id: "day-3",
   //   dayNumber: 3,
