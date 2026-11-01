@@ -44,5 +44,28 @@ export const initialNotes = [
     caption: "St. Antony and All Saints Pray for us as we walk this Path of Love.",
     tapeColor: "washi-linen", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
     tapeAngle: -2.0
+  },
+  {
+    id: "day-3",
+    dayNumber: 3,
+    date: "2026-11-02",
+    dayOfWeek: "Monday",
+    timelineDate: "November 02, 2026",
+    title: "Fill Us With Your Compassion",
+    note: "Let's entrust ourselves to Jesus the most compassionate, So that we may also be compassionate to each other. To know that we are wounded in many ways and to have compassion rather than avoiding it, so that we may help each other heal and grow in Christ.",
+    signature: "With Compassion - LA",
+    scripture: "Everything that the Father gives me will come to me, and anyone who comes to me I will never drive away. - John 6:37",
+
+    // Background Song (plays in the bottom-right song player)
+    songUrl: "https://youtu.be/-wTwu2UvM98?si=-B7x9kSoTLBVmPco",
+    songTitle: "Nin Snehathal - Mathew T John",
+
+    // Reflection Video (opened by the wax stamp on the note card)
+    videoUrl: "https://youtu.be/RAWZvm0P4ic?si=VX_1WgKz_MyiTf07",
+    videoTitle: "Finding Your True Identity in Christ",
+
+    caption: "May we die to the world and Live for Your Kingdom.",
+    tapeColor: "washi-sage", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
+    tapeAngle: -2.3
   }
 ];
