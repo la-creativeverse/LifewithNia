@@ -21,5 +21,28 @@ export const initialNotes = [
     caption: "Holiness is Relational. Let's Pray for Dada - Conny",
     tapeColor: "washi-gold", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
     tapeAngle: -2.5
+  },
+  {
+    id: "day-2",
+    dayNumber: 2,
+    date: "2026-11-01",
+    dayOfWeek: "Sunday",
+    timelineDate: "November 01, 2026",
+    title: "Arn't We Blessed?",
+    note: "The ache in our heart is Real but isn't it such a blessing. We proclaim Christ crucifed and now we join his cross with this simple sacrifice. Let's Rejoice and Give Thanks and Walk Hand in Hand towards Heaven.",
+    signature: "With Hope and Love - LA",
+    scripture: "Blessed are they that mourn: for they shall be comforted. — Matthew 5:4",
+
+    // Background Song (plays in the bottom-right song player)
+    songUrl: "https://youtu.be/JKH0Z4DuGhE",
+    songTitle: "Mi Corazon - Don Moen",
+
+    // Reflection Video (opened by the wax stamp on the note card)
+    videoUrl: "https://youtu.be/ZQKmCxTkzYE?si=jFfxX5m0FngSl9DS",
+    videoTitle: "Marry Someone Who Loves God More Than They Love You",
+
+    caption: "St. Antony and All Saints Pray for us as we walk this Path of Love.",
+    tapeColor: "washi-linen", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
+    tapeAngle: -2.0
   }
 ];
