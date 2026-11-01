@@ -18,11 +18,6 @@ export class BackgroundMusicPlayer {
     this.htmlAudio = null;
     this.isYtReady = false;
 
-    // Automatic ad-detect & mute/unmute state
-    this.expectedYtId = null;
-    this.adCheckInterval = null;
-    this.isAdMuted = false;
-
     this.barEl = null;
     this.init();
   }
@@ -124,7 +119,6 @@ export class BackgroundMusicPlayer {
             if (event.data === window.YT.PlayerState.PLAYING) {
               this.isPlaying = true;
               this.updateUI();
-              this.checkAdState();
             } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
               this.isPlaying = false;
               this.updateUI();
@@ -285,7 +279,6 @@ export class BackgroundMusicPlayer {
     const isDirectAudio = item.audioUrl || (songUrl && /\.(mp3|wav|m4a|aac)(\?.*)?$/i.test(songUrl));
 
     if (isDirectAudio) {
-      this.stopAdMonitor();
       // Pause YouTube if running
       if (this.ytPlayer && this.isYtReady && typeof this.ytPlayer.pauseVideo === 'function') {
         this.ytPlayer.pauseVideo();
@@ -298,10 +291,6 @@ export class BackgroundMusicPlayer {
     } else if (ytId) {
       // Pause HTML Audio
       this.htmlAudio.pause();
-      this.expectedYtId = ytId;
-      this.isAdMuted = false;
-      this.startAdMonitor();
-
       if (this.ytPlayer && this.isYtReady) {
         try {
           if (typeof this.ytPlayer.unMute === 'function') this.ytPlayer.unMute();
@@ -324,102 +313,11 @@ export class BackgroundMusicPlayer {
     this.updateUI();
   }
 
-  startAdMonitor() {
-    this.stopAdMonitor();
-    this.checkAdState();
-    this.adCheckInterval = setInterval(() => {
-      this.checkAdState();
-    }, 200);
-  }
-
-  stopAdMonitor() {
-    if (this.adCheckInterval) {
-      clearInterval(this.adCheckInterval);
-      this.adCheckInterval = null;
-    }
-  }
-
-  checkAdState() {
-    if (!this.ytPlayer || !this.isYtReady || !this.expectedYtId) {
-      return;
-    }
-
-    try {
-      let isAd = false;
-      let currentId = null;
-
-      // Check 1: getVideoData() inspection
-      if (typeof this.ytPlayer.getVideoData === 'function') {
-        const data = this.ytPlayer.getVideoData();
-        currentId = data ? data.video_id : null;
-
-        // If video data is present but video_id does not match the expected track:
-        if (data && (!currentId || currentId !== this.expectedYtId)) {
-          isAd = true;
-        }
-      }
-
-      // Check 2: getAdState if exposed
-      if (typeof this.ytPlayer.getAdState === 'function') {
-        if (this.ytPlayer.getAdState() === 1) {
-          isAd = true;
-        }
-      }
-
-      if (isAd) {
-        // Advertisement is playing -> silence automatically
-        if (typeof this.ytPlayer.isMuted === 'function' && !this.ytPlayer.isMuted()) {
-          if (typeof this.ytPlayer.mute === 'function') {
-            this.ytPlayer.mute();
-            this.isAdMuted = true;
-            this.updateAdUI(true);
-          }
-        }
-      } else if (currentId === this.expectedYtId) {
-        // Actual song has started -> restore volume automatically!
-        if (this.isAdMuted) {
-          if (typeof this.ytPlayer.unMute === 'function') {
-            this.ytPlayer.unMute();
-          }
-          if (typeof this.ytPlayer.setVolume === 'function') {
-            this.ytPlayer.setVolume(100);
-          }
-          this.isAdMuted = false;
-          this.updateAdUI(false);
-        }
-      }
-    } catch (_) {
-      // Ignore transient cross-origin API exceptions during transitions
-    }
-  }
-
-  updateAdUI(isAd) {
-    if (!this.barEl) return;
-    const artistEl = document.getElementById('music-song-artist');
-
-    if (isAd) {
-      this.barEl.classList.add('is-ad-muted');
-      if (artistEl) {
-        if (!artistEl.dataset.originalArtist) {
-          artistEl.dataset.originalArtist = artistEl.textContent;
-        }
-        artistEl.textContent = 'Ad muted • Song starting soon';
-      }
-    } else {
-      this.barEl.classList.remove('is-ad-muted');
-      if (artistEl && artistEl.dataset.originalArtist) {
-        artistEl.textContent = artistEl.dataset.originalArtist;
-        delete artistEl.dataset.originalArtist;
-      }
-    }
-  }
-
   pause(userInitiated = false) {
     if (userInitiated) {
       this.isUserPaused = true;
     }
     this.isPlaying = false;
-    this.stopAdMonitor();
     if (this.htmlAudio) this.htmlAudio.pause();
     if (this.ytPlayer && this.isYtReady && typeof this.ytPlayer.pauseVideo === 'function') {
       this.ytPlayer.pauseVideo();

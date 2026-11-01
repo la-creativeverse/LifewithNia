@@ -740,28 +740,6 @@ html, body {
   50% { height: 14px; }
 }
 
-/* Ad-Muted State for Background Music Player */
-.ambient-music-bar.is-ad-muted {
-  border-color: rgba(197, 160, 89, 0.25);
-  background: rgba(255, 252, 245, 0.85);
-}
-
-.ambient-music-bar.is-ad-muted .music-sound-waves .wave-bar {
-  opacity: 0.35;
-  animation-play-state: paused;
-}
-
-.ambient-music-bar.is-ad-muted .song-artist {
-  color: var(--sacred-gold);
-  font-weight: 500;
-  animation: adMutePulse 1.8s infinite ease-in-out;
-}
-
-@keyframes adMutePulse {
-  0%, 100% { opacity: 0.65; }
-  50% { opacity: 1; }
-}
-
 .music-ext-link {
   font-size: 0.85rem;
   color: var(--ink-subtle);
