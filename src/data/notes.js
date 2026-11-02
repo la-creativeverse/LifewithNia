@@ -69,11 +69,11 @@ export const initialNotes = [
     tapeAngle: -2.3
   },
   {
-    id: "Is This It?",
+    id: "day-4",
     dayNumber: 4,
     date: "2026-11-03",
     dayOfWeek: "Tuesday",
-    timelineDate: "November 03, 2026",
+    timelineDate: "Is This It?",
     title: "Be My Light",
     note: "Amidst confusion and feeling lost, we look upto You O Lord, Lamp to my Feet and Light to my Path. We Trust in You to lead us to eternity with You in all things we pursue. With this Hope in our hearts, We rest in Your most Sacred Heart.",
     signature: "Holding On - LA",
