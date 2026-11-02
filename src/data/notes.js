@@ -67,5 +67,28 @@ export const initialNotes = [
     caption: "May we die to the world and Live for Your Kingdom.",
     tapeColor: "washi-sage", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
     tapeAngle: -2.3
+  },
+  {
+    id: "Is This It?",
+    dayNumber: 4,
+    date: "2026-11-03",
+    dayOfWeek: "Tuesday",
+    timelineDate: "November 03, 2026",
+    title: "Be My Light",
+    note: "Amidst confusion and feeling lost, we look upto You O Lord, Lamp to my Feet and Light to my Path. We Trust in You to lead us to eternity with You in all things we pursue. With this Hope in our hearts, We rest in Your most Sacred Heart.",
+    signature: "Holding On - LA",
+    scripture: "Seek his will in all you do, and he will show you which path to take. - Proverb 3:6",
+
+    // Background Song (plays in the bottom-right song player)
+    songUrl: "https://youtu.be/LuvfMDhTyMA?si=07eLuJw_pqH-RH4h",
+    songTitle: "Lord I Need You - Matt Maher",
+
+    // Reflection Video (opened by the wax stamp on the note card)
+    videoUrl: "https://youtu.be/BQOkRRc5n_w?si=RFbv85_rdV_SLd-w",
+    videoTitle: "Is God Going to Give You What You Want?",
+
+    caption: "Lord We Need You, Lead Us in Your Path to Salvation.",
+    tapeColor: "washi-kraft", // 'washi-gold' | 'washi-linen' | 'washi-sage' | 'washi-kraft'
+    tapeAngle: -2.1
   }
 ];
